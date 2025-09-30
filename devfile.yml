@@ -23,7 +23,7 @@ components:
   # PostgreSQL 15 container
   - name: postgres
     container:
-      image: postgres:15
+      image: rhel8/postgresql-15
       memoryLimit: 512Mi
       memoryRequest: 256Mi
       env:
