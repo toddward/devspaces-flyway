@@ -60,11 +60,11 @@ commands:
     exec:
       component: udi
       commandLine: |
-        if [ ! -f /opt/flyway/flyway ]; then
+        if [ ! -f ${PROJECT_SOURCE}/flyway ]; then
           echo "Installing Flyway..."
           wget -qO- https://download.red-gate.com/maven/release/com/redgate/flyway/flyway-commandline/10.20.1/flyway-commandline-10.20.1-linux-x64.tar.gz | tar -xvz -C /tmp
-          mv /tmp/flyway-10.20.1/* /opt/flyway/
-          chmod +x /opt/flyway/flyway
+          mv /tmp/flyway-10.20.1/* ${PROJECT_SOURCE}
+          chmod +x ${PROJECT_SOURCE}/flyway
           echo "Flyway installed successfully"
         else
           echo "Flyway already installed"
