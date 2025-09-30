@@ -37,14 +37,6 @@ components:
         - name: postgres
           targetPort: 5432
           exposure: internal
-      volumeMounts:
-        - name: postgres-data
-          path: /var/lib/postgresql/data
-
-  # Volume for PostgreSQL data
-  - name: postgres-data
-    volume:
-      size: 2Gi
 
 # Command to install Flyway on startup
 commands:
