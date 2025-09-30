@@ -16,12 +16,9 @@ components:
         - name: app
           targetPort: 8080
           exposure: public
-      volumeMounts:
-        - name: flyway
-          path: /opt/flyway
       env:
         - name: PATH
-          value: /opt/flyway:$PATH
+          value: ${PROJECT_SOURCE}/flyway:$PATH
 
   # PostgreSQL 15 container
   - name: postgres
@@ -44,11 +41,6 @@ components:
         - name: postgres-data
           path: /var/lib/postgresql/data
 
-  # Volume for Flyway installation
-  - name: flyway
-    volume:
-      size: 1Gi
-
   # Volume for PostgreSQL data
   - name: postgres-data
     volume:
@@ -61,17 +53,12 @@ commands:
       component: udi
       commandLine: |
         echo "Installing Flyway..."
-        wget -qO- https://download.red-gate.com/maven/release/com/redgate/flyway/flyway-commandline/10.20.1/flyway-commandline-10.20.1-linux-x64.tar.gz | tar -xvz -C /tmp
-        mkdir ${PROJECT_SOURCE}/flyway
-        mv /tmp/flyway-10.20.1/* ${PROJECT_SOURCE}/flyway
+        wget -qO- https://download.red-gate.com/maven/release/com/redgate/flyway/flyway-commandline/10.20.1/flyway-commandline-10.20.1-linux-x64.tar.gz | tar -xz -C /tmp
+        mkdir -p ${PROJECT_SOURCE}/flyway
+        mv /tmp/flyway-10.20.1/* ${PROJECT_SOURCE}/flyway/
         chmod +x ${PROJECT_SOURCE}/flyway/flyway
         echo "Flyway installed successfully"
-      workingDir: ${PROJECT_SOURCE}
-
-  - id: verify-flyway
-    exec:
-      component: udi
-      commandLine: flyway -v
+        ${PROJECT_SOURCE}/flyway/flyway -v
       workingDir: ${PROJECT_SOURCE}
 
 events:
