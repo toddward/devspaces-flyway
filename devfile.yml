@@ -1,0 +1,82 @@
+schemaVersion: 2.2.0
+metadata:
+  name: flyway-demo
+
+components:
+  # Main UDI container with Flyway
+  - name: udi
+    container:
+      image: registry.redhat.io/devspaces/udi-rhel8:latest
+      memoryLimit: 2Gi
+      memoryRequest: 1Gi
+      cpuLimit: 1000m
+      cpuRequest: 500m
+      mountSources: true
+      endpoints:
+        - name: app
+          targetPort: 8080
+          exposure: public
+      volumeMounts:
+        - name: flyway
+          path: /opt/flyway
+      env:
+        - name: PATH
+          value: /opt/flyway:$PATH
+
+  # PostgreSQL 15 container
+  - name: postgres
+    container:
+      image: postgres:15
+      memoryLimit: 512Mi
+      memoryRequest: 256Mi
+      env:
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: postgres
+        - name: POSTGRES_DB
+          value: mydb
+      endpoints:
+        - name: postgres
+          targetPort: 5432
+          exposure: internal
+      volumeMounts:
+        - name: postgres-data
+          path: /var/lib/postgresql/data
+
+  # Volume for Flyway installation
+  - name: flyway
+    volume:
+      size: 1Gi
+
+  # Volume for PostgreSQL data
+  - name: postgres-data
+    volume:
+      size: 2Gi
+
+# Command to install Flyway on startup
+commands:
+  - id: install-flyway
+    exec:
+      component: udi
+      commandLine: |
+        if [ ! -f /opt/flyway/flyway ]; then
+          echo "Installing Flyway..."
+          wget -qO- https://download.red-gate.com/maven/release/com/redgate/flyway/flyway-commandline/10.20.1/flyway-commandline-10.20.1-linux-x64.tar.gz | tar -xvz -C /tmp
+          mv /tmp/flyway-10.20.1/* /opt/flyway/
+          chmod +x /opt/flyway/flyway
+          echo "Flyway installed successfully"
+        else
+          echo "Flyway already installed"
+        fi
+      workingDir: ${PROJECT_SOURCE}
+
+  - id: verify-flyway
+    exec:
+      component: udi
+      commandLine: flyway -v
+      workingDir: ${PROJECT_SOURCE}
+
+events:
+  postStart:
+    - install-flyway
