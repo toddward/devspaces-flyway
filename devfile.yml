@@ -27,12 +27,12 @@ components:
       memoryLimit: 512Mi
       memoryRequest: 256Mi
       env:
-        - name: POSTGRES_USER
+        - name: POSTGRESQL_USER
           value: postgres
-        - name: POSTGRES_PASSWORD
+        - name: POSTGRESQL_PASSWORD
           value: postgres
-        - name: POSTGRES_DB
-          value: mydb
+        - name: POSTGRESQL_DB
+          value: myapp_db
       endpoints:
         - name: postgres
           targetPort: 5432
